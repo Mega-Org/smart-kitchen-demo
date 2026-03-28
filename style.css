@@ -33,6 +33,7 @@ body {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
+  padding: 16px; /* Margin for mobile view */
   overflow: hidden; /* App-like feel */
   user-select: none;
 }
@@ -43,7 +44,7 @@ body {
   width: 100%;
   max-width: 480px; /* Mobile width aspect ratio */
   height: 100vh;
-  max-height: 850px;
+  max-height: calc(100vh - 32px); /* respect mobile paddings */
   background-color: var(--color-card-bg);
   border: var(--stroke);
   border-radius: var(--radius-xl);
@@ -245,4 +246,66 @@ body {
   body {
     padding: 20px;
   }
+}
+
+/* Start Overlay Landing Background */
+#start-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  background-color: var(--color-bg);
+  background-image: url('assets/landing.png');
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end; /* push content down so we can see the image */
+  padding-bottom: 60px;
+}
+
+#start-overlay h1 {
+  display: none; /* We use the banner in the graphic instead */
+}
+
+#start-overlay .btn-primary {
+  animation: float 2s ease-in-out infinite;
+}
+
+/* Custom Localized Arabic Sign Overlay */
+.arabic-sign {
+  position: absolute;
+  top: 8%; /* Adjust to cover the English title */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #DEAB7B; /* Warm wooden tone */
+  border: 6px solid var(--color-outline);
+  border-radius: 24px;
+  padding: 16px 40px;
+  box-shadow: 0 10px 0 rgba(92, 64, 51, 1);
+  z-index: 1010;
+  white-space: nowrap;
+}
+
+.arabic-sign h1 {
+  display: block !important;
+  color: #FFF;
+  font-size: 2.2rem;
+  margin: 0;
+  text-shadow: 2px 2px 0 var(--color-outline),
+               -2px -2px 0 var(--color-outline),
+                2px -2px 0 var(--color-outline),
+               -2px  2px 0 var(--color-outline),
+                0 4px 0 var(--color-outline);
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.btn-start-demo {
+  font-size: 1.6rem;
+  padding: 20px 40px;
+  box-shadow: 0 8px 0 var(--color-outline);
 }

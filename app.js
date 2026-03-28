@@ -43,18 +43,68 @@ const app = {
         }
     },
 
-    speak(text, cancelPrevious = true) {
-        if (!('speechSynthesis' in window)) return;
-        
-        if (cancelPrevious) {
-            window.speechSynthesis.cancel();
-        }
+    speakQueue: [],
+    currentAudio: null,
 
+    speak(text, cancelPrevious = true) {
+        if (cancelPrevious) {
+            this.speakQueue = [];
+            if (this.currentAudio) {
+                this.currentAudio.pause();
+                this.currentAudio = null;
+            }
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+        }
+        
+        this.speakQueue.push(text);
+        if (!this.currentAudio) {
+            this.processQueue();
+        }
+    },
+
+    processQueue() {
+        if (this.speakQueue.length === 0) return;
+        const text = this.speakQueue.shift();
+
+        // High quality smooth female voice (using an undocumented public translation TTS for smooth arabic output)
+        const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=ar&client=tw-ob`;
+        const audio = new Audio(url);
+        audio.playbackRate = 1.15; // Slightly faster/higher pitch to emulate a youthful voice
+        
+        this.currentAudio = audio;
+        
+        audio.onended = () => {
+            this.currentAudio = null;
+            this.processQueue();
+        };
+
+        audio.onerror = () => {
+            this.currentAudio = null;
+            this.fallbackNativeTTS(text);
+        };
+
+        audio.play().catch(e => {
+            this.currentAudio = null;
+            this.fallbackNativeTTS(text);
+        });
+    },
+
+    fallbackNativeTTS(text) {
+        if (!('speechSynthesis' in window)) {
+            this.processQueue();
+            return;
+        }
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'ar-SA'; 
         utterance.rate = 1.0; 
-        utterance.pitch = 1.6; // Higher pitch to sound like a small girl
-
+        utterance.pitch = 1.6; 
+        
+        utterance.onend = () => {
+            this.processQueue();
+        };
+        
         // Try to find a female Arabic voice
         const voices = window.speechSynthesis.getVoices();
         const arabicVoices = voices.filter(v => v.lang.startsWith('ar'));
@@ -68,7 +118,7 @@ const app = {
             );
             utterance.voice = femaleVoice || arabicVoices[0];
         }
-
+        
         window.speechSynthesis.speak(utterance);
     },
 
